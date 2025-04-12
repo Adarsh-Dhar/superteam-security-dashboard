@@ -1,55 +1,79 @@
-// pages/api/blocknative-mempool.ts
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Blocknative from 'bnc-sdk'
+// app/api/solana-mempool/route.ts
+import { NextResponse } from 'next/server'
+import { Connection, PublicKey } from '@solana/web3.js'
+import WebSocket from 'ws'
 
-type MempoolResponse = {
-  success: boolean
-  message: string
-  blockedTransactions?: string[]
-}
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<MempoolResponse>
-) {
+export const GET = async () => {
   try {
-    // Initialize Blocknative client
-    const blocknative = new Blocknative({
-        //@ts-ignore
-      dappId: process.env.BLOCKNATIVE_API_KEY,
-      networkId: 5, // 5 = Solana mainnet
-      transactionHandlers: [handleTransaction]
+    const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+    const WS_URL = process.env.SOLANA_WS_URL || 'wss://api.mainnet-beta.solana.com'
+    const blockedTxs: string[] = []
+    
+    // Validate and create PublicKey instance
+    const address = new PublicKey('C68a6RCGLiPskbPYtAcsCjhG8tfTWYcoB4JjCrXFdqyo')
+
+    // Create Solana connection
+    const connection = new Connection(SOLANA_RPC_URL, {
+      wsEndpoint: WS_URL,
+      commitment: 'confirmed'
     })
 
-    // Start mempool monitoring
-    //@ts-ignore
-    const { emitter } = blocknative.mempool()
-    const blockedTxs: string[] = []
+    // Create WebSocket subscription
+    const ws = new WebSocket(WS_URL)
 
-    // Transaction handler
-    function handleTransaction(tx: any) {
-      if (tx.input?.startsWith('malicious_pattern')) {
-        blockedTxs.push(tx.hash)
-        console.log(`Blocked suspicious transaction: ${tx.hash}`)
+    // Handle incoming transactions
+    ws.on('open', () => {
+      const subscribeMessage = {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'logsSubscribe',
+        params: [
+          {
+            mentions: [address.toString()]
+          },
+          { commitment: 'confirmed' }
+        ]
       }
-    }
 
-    // Close connection after 5 seconds for demo purposes
-    setTimeout(() => {
-      emitter.off('tx', handleTransaction)
-    }, 5000)
+      ws.send(JSON.stringify(subscribeMessage))
+    })
 
-    return res.status(200).json({
+    ws.on('message', async (data) => {
+      const message = JSON.parse(data.toString())
+      
+      if (message.method === 'logsNotification') {
+        const signature = message.params.result.context.signature
+        const tx = await connection.getTransaction(signature, {
+          commitment: 'confirmed'
+        })
+
+        if (tx?.meta?.err) {
+          blockedTxs.push(signature)
+          console.log(`Blocked failed transaction: ${signature}`)
+        }
+
+        // // Add custom filtering logic here
+        // if (tx?.transaction.instructions.some(ix => 
+        //   ix.data.toString('utf-8').includes('malicious_pattern')
+        // )) {
+        //   blockedTxs.push(signature)
+        //   console.log(`Blocked suspicious transaction: ${signature}`)
+        // }
+      }
+    })
+
+    // Return immediate response with monitoring status
+    return NextResponse.json({
       success: true,
-      message: 'Mempool monitoring initialized',
+      message: 'Solana mempool monitoring initialized',
       blockedTransactions: blockedTxs
     })
 
   } catch (error) {
-    console.error('Mempool monitoring error:', error)
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to initialize mempool monitoring'
-    })
+    console.error('Solana monitoring error:', error)
+    return NextResponse.json(
+      { success: false, message: 'Failed to initialize Solana monitoring' },
+      { status: 500 }
+    )
   }
 }
