@@ -6,163 +6,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { CodeViewer } from "@/components/dashboard/code-viewer"
-import { ExploitDiagram } from "@/components/dashboard/exploit-diagram"
+import { FlowDiagram } from "@/components/dashboard/exploit-diagram"
 import { FundFlowTable } from "@/components/dashboard/fund-flow-table"
 import { RemediationTable } from "@/components/dashboard/remediation-table"
 import { Timeline } from "@/components/dashboard/timeline"
 import { TVLChart } from "@/components/dashboard/tvl-chart"
 import { StatCard } from "@/components/dashboard/stat-card"
-import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
+
+// Import data from the data file
+import {
+  vulnerable_code,
+  fixed_code,
+  flow_data,
+  remediationData,
+  timeline,
+  tvl_chart_data,
+  exploit_diagram_data,
+  stat_card_data,
+} from "@/resources/wormhole-02-02-2022/data"
 
 export default function WormholeDashboard() {
-  // Mock data for the components
-  const fundFlowData: FundFlow[] = [
-    {
-      blockchain: "Solana",
-      from: "Wormhole Contract",
-      to: "0x629...a92e",
-      amount: "120,000 wETH",
-      status: "Stolen",
-    },
-    {
-      blockchain: "Ethereum",
-      from: "0x629...a92e",
-      to: "0x8d2...f3a1",
-      amount: "93,750 ETH",
-      status: "Traced",
-    },
-    {
-      blockchain: "Ethereum",
-      from: "0x8d2...f3a1",
-      to: "Binance",
-      amount: "56,250 ETH",
-      status: "Frozen",
-    },
-    {
-      blockchain: "Ethereum",
-      from: "0x8d2...f3a1",
-      to: "Tornado Cash",
-      amount: "37,500 ETH",
-      status: "Mixed",
-    },
-  ]
-
-  const remediationData: RemediationAction[] = [
-    {
-      action: "Vulnerability patched in Wormhole contract",
-      status: "Complete",
-      date: "Feb 3, 2022",
-    },
-    {
-      action: "Jump Crypto provides 120,000 ETH to restore bridge reserves",
-      status: "Complete",
-      date: "Feb 3, 2022",
-    },
-    {
-      action: "Improved signature verification process implemented",
-      status: "Complete",
-      date: "Feb 5, 2022",
-    },
-    {
-      action: "Additional security audit by third-party firm",
-      status: "Complete",
-      date: "Feb 24, 2022",
-    },
-    {
-      action: "Recovery of stolen funds from exchanges",
-      status: "In Progress",
-      date: "Ongoing",
-    },
-  ]
-
-  const timelineEvents: TimelineEvent[] = [
-    {
-      time: "Feb 2, 2022 - 18:24 UTC",
-      title: "Initial Exploit Transaction",
-      description:
-        "Attacker exploits signature verification vulnerability to mint 120,000 wETH tokens without proper backing.",
-    },
-    {
-      time: "Feb 2, 2022 - 19:15 UTC",
-      title: "Exploit Detected",
-      description: "Wormhole team detects the unauthorized minting of wETH tokens and halts bridge operations.",
-    },
-    {
-      time: "Feb 2, 2022 - 20:30 UTC",
-      title: "Public Disclosure",
-      description: "Wormhole publicly announces the exploit on Twitter and begins investigation.",
-    },
-    {
-      time: "Feb 3, 2022 - 02:45 UTC",
-      title: "Vulnerability Identified",
-      description: "Security team identifies the signature verification bypass vulnerability in the contract.",
-    },
-    {
-      time: "Feb 3, 2022 - 13:30 UTC",
-      title: "Patch Deployed",
-      description: "Fixed version of the contract deployed with proper signature verification.",
-    },
-    {
-      time: "Feb 3, 2022 - 16:20 UTC",
-      title: "Funds Replenished",
-      description: "Jump Crypto provides 120,000 ETH to restore the bridge's reserves and operations.",
-    },
-  ]
-
-  const vulnerableCode = `// Vulnerable code snippet from Wormhole
-function verifySignatures(bytes32 hash, Signature[] memory signatures) internal view {
-  // VULNERABILITY: Improper signature verification
-  // The function doesn't properly validate that signatures come from authorized guardians
-  
-  uint8 guardianCount = 19;
-  uint8 signersLen = 0;
-  
-  for (uint i = 0; i < signatures.length; i++) {
-    address signer = ecrecover(
-      hash,
-      signatures[i].v,
-      signatures[i].r,
-      signatures[i].s
-    );
-    
-    // Missing proper validation of signer against authorized guardians list
-    signersLen += 1;
-  }
-  
-  // Only checks if enough signatures are provided, not if they're from valid guardians
-  require(signersLen >= quorum(guardianCount), "not enough signatures");
-}`
-
-  const fixedCode = `// Fixed code after patch
-function verifySignatures(bytes32 hash, Signature[] memory signatures) internal view {
-  // FIXED: Proper signature verification
-  
-  uint8 guardianCount = 19;
-  uint8 signersLen = 0;
-  bool[] memory signed = new bool[](guardianCount);
-  
-  for (uint i = 0; i < signatures.length; i++) {
-    address signer = ecrecover(
-      hash,
-      signatures[i].v,
-      signatures[i].r,
-      signatures[i].s
-    );
-    
-    // Get guardian index from authorized list
-    uint8 guardianIndex = getGuardianIndex(signer);
-    
-    // Verify signer is a guardian and hasn't signed already
-    require(guardianIndex < guardianCount, "invalid guardian");
-    require(!signed[guardianIndex], "duplicate guardian");
-    
-    signed[guardianIndex] = true;
-    signersLen += 1;
-  }
-  
-  require(signersLen >= quorum(guardianCount), "not enough signatures");
-}`
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -221,7 +84,13 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
 
           <div className="grid gap-6 md:grid-cols-4">
             <StatCard title="Date of Exploit" value="Feb 2, 2022" />
-            <StatCard title="Funds Lost" value="$325,000,000" isCritical={true} />
+            <StatCard
+              title={stat_card_data.title}
+              value={stat_card_data.value}
+              isCritical={stat_card_data.isCritical}
+              showProgress={stat_card_data.showProgress}
+              progressValue={stat_card_data.progressValue}
+            />
             <StatCard title="Funds Recovered" value="$0" isCritical={true} />
             <StatCard title="Funds Replenished" value="$325,000,000" />
           </div>
@@ -274,7 +143,12 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
                 <CardDescription>Total Value Locked before and after exploit</CardDescription>
               </CardHeader>
               <CardContent>
-                <TVLChart />
+                <TVLChart
+                  data={tvl_chart_data.data}
+                  exploitDate={tvl_chart_data.exploitDate}
+                  title={tvl_chart_data.title}
+                  showPercentageChange={tvl_chart_data.showPercentageChange}
+                />
               </CardContent>
             </Card>
           </div>
@@ -286,7 +160,15 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
                 <CardDescription>Visual representation of the attack vector</CardDescription>
               </CardHeader>
               <CardContent>
-                <ExploitDiagram />
+                <FlowDiagram
+                  title={exploit_diagram_data.title}
+                  //@ts-ignore
+                  topSteps={exploit_diagram_data.topSteps}
+                  //@ts-ignore
+                  bottomSteps={exploit_diagram_data.bottomSteps}
+                  //@ts-ignore
+                  bottomArrowLabels={exploit_diagram_data.bottomArrowLabels}
+                />
               </CardContent>
             </Card>
           </div>
@@ -307,7 +189,7 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
                     <CardDescription>Chronological sequence of events</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Timeline events={timelineEvents} />
+                    <Timeline events={timeline} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -319,7 +201,7 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
                     <CardDescription>Tracking the movement of stolen funds</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <FundFlowTable data={fundFlowData} />
+                    <FundFlowTable data={flow_data} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -344,7 +226,7 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
                       <CardDescription>The code that contained the vulnerability</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <CodeViewer code={vulnerableCode} />
+                      <CodeViewer code={vulnerable_code} />
                     </CardContent>
                   </Card>
 
@@ -354,7 +236,7 @@ function verifySignatures(bytes32 hash, Signature[] memory signatures) internal 
                       <CardDescription>The patched code that fixed the vulnerability</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <CodeViewer code={fixedCode} />
+                      <CodeViewer code={fixed_code} />
                     </CardContent>
                   </Card>
                 </div>
