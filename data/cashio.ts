@@ -13,26 +13,62 @@ fn verify_collateral(collateral: &AccountInfo) {
 `;
 
 export const flow_data: FundFlow[] = [
-  {
-    blockchain: "Solana",
-    from: "Cashio Mint",
-    to: "Attacker Wallet",
-    amount: "2B CASH ($52M)",
-    status: "Stolen"
-  }
+    {
+        blockchain: "Solana",
+        from: "Cashio Mint Program",
+        to: "Hv7sV...FAvUsU (Attacker)",
+        amount: "2B CASH ($52M)",
+        status: "Stolen"
+      },
+      {
+        blockchain: "Solana",
+        from: "Hv7sV...FAvUsU",
+        to: "Saber DEX",
+        amount: "10.8M UST + 16.4M USDC",
+        status: "Swapped"
+      },
+      {
+        blockchain: "Ethereum",
+        from: "0x2913...4a0f",
+        to: "Tornado Cash",
+        amount: "16,400 ETH ($48M)",
+        status: "Mixed"
+      },
+      {
+        blockchain: "Solana",
+        from: "Attacker Wallet",
+        to: "Small Holders (<$100K)",
+        amount: "$4.8M Refunded",
+        status: "Recovered"
+      }
 ];
 
 export const remediation_data: RemediationAction[] = [
-  {
-    action: "Protocol Shutdown",
-    status: "Complete",
-    date: "2022-03-23"
-  },
-  {
-    action: "Community Patch Deployment",
-    status: "Complete",
-    date: "2022-03-24"
-  }
+    {
+        action: "Protocol Immediate Shutdown",
+        status: "Complete",
+        date: "2022-03-23"
+      },
+      {
+        action: "Community Patch Deployment",
+        status: "Complete", 
+        date: "2022-03-24"
+      },
+      {
+        action: "Partial User Refunds (<$100K)",
+        status: "Partial",
+        date: "2022-03-29"
+      },
+      {
+        action: "Third-Party Security Audit",
+        status: "Complete",
+        date: "2022-04-05"
+      },
+      {
+        action: "Legal Proceedings Initiated",
+        status: "Ongoing",
+        date: "2022-04-12"
+      }
 ];
 
 export const stat_card_data = {
@@ -78,3 +114,16 @@ export const exploit_diagram_data = {
     "$52M Converted"
   ]
 };
+
+export const tvl_chart_data = {
+    title: "Cashio TVL Collapse",
+    exploitDate: "2022-03-23",
+    showPercentageChange: true,
+    data: [
+      { date: "2022-03-01", value: 28_000_000 }, // Pre-hack TVL
+      { date: "2022-03-22", value: 26_500_000 },
+      { date: "2022-03-23", value: 209_000 }, // Exploit day
+      { date: "2022-03-24", value: 0 },
+      { date: "2022-04-01", value: 0 } // Protocol dead
+    ]
+  };
