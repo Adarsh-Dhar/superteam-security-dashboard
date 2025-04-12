@@ -1,19 +1,20 @@
-export type FundFlow = {
-    blockchain: string;
-    from: string;
-    to: string;
-    amount: string;
-    status: 'Stolen' | 'Traced' | 'Frozen' | 'Mixed';
-  };
+export interface FundFlow {
+    blockchain: string
+    from: string
+    to: string
+    amount: string
+    status: string
+  }
   
-  export type RemediationAction = {
-    action: string;
-    status: 'Complete' | 'In Progress';
-    date: string;
-  };
+  export interface RemediationAction {
+    action: string
+    status: string
+    date: string
+  }
   
-  export type TimelineEvent = {
-    time: string;
-    title: string;
-    description: string;
-  };
+  export interface TimelineEvent {
+    time: string
+    title: string
+    description: string
+  }
+  
