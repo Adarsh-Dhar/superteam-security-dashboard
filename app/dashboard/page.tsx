@@ -23,7 +23,7 @@ import {
   tvl_chart_data,
   exploit_diagram_data,
   stat_card_data,
-} from "@/resources/wormhole-02-02-2022/data"
+} from "@/data/wormhole"
 
 export default function WormholeDashboard() {
   return (

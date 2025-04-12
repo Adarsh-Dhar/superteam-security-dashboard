@@ -1,6 +1,4 @@
 import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
-import { title } from "process"
-
 
 export const vulnerable_code = `
    let instruction = solana_program::sysvar::instructions::load_instruction_at(
