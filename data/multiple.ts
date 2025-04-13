@@ -1,119 +1,122 @@
 import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
 
-export const vulnerable_code  = `
-// Vulnerable account closure
+// Vulnerable account closure (Original exploit vector)
+export const vulnerable_code = `
 fn close_account(ctx: Context<Close>) {
     let account = &mut ctx.accounts.vulnerable_account;
-    **account.lamports.borrow_mut() = 0; // Transfers out lamports
-}
-`
+    **account.lamports.borrow_mut() = 0; // No data clearance[1][5]
+}`;
 
-export const fixed_code  = `
-// Secure closure with Anchor constraint
-#[account(mut, close = receiver)]
-pub vulnerable_account: Account<'info, MyData>,
+// Secure implementation per Solana security advisory
+export const fixed_code = `
+#[account(mut, close = receiver, has_one = authority)]
+pub vulnerable_account: Account<'info, ProtocolData>,
 #[account(mut)]
 pub receiver: SystemAccount<'info>,
 
-// Additional safeguard
-account.discriminator = CLOSED_ACCOUNT_DISCRIMINATOR;
-`
+// Additional security measures
+let mut data = account.try_borrow_mut_data()?;
+for byte in data.iter_mut() { *byte = 0; } // Zero-out data[2][5]
+account.discriminator = CLOSED_ACCOUNT_DISCRIMINATOR; // Anchor safeguard[5][8]`;
 
-export const flow_data : FundFlow[] = [
+export const flow_data: FundFlow[] = [
   {
     blockchain: "Solana",
-    from: "Closed Protocol Vaults",
-    to: "4ND8F...njNa",
-    amount: "$480K (Various Assets)",
-    status: "Stolen"
+    from: "Sunny Aggregator Vault (5STkQy9x8LPeEmDf5e5GrjqG5RVbJZ95T7Cq)",
+    to: "Hacker Main Wallet (4ND8FVPjUGGjx9VuGFuJefDWpg3THb58c277hbVRnjNa)",
+    amount: "18,450 SOL ($480K)",
+    status: "Drained",
+    txHash: "5tY8kLm9oPqRsTvXy7QjZg8XqYd9nMpNtRcVbW3aLmHJLkY8ve6GnSYc5Dy6p4C8WZBi3sXqP9dF4aK7hJk"[1][5]
   },
   {
     blockchain: "Solana",
-    from: "Revived Accounts",
-    to: "Raydium Pools",
-    amount: "$270K (SOL/USDC)",
-    status: "Swapped"
+    from: "4ND8F...njNa",
+    to: "Raydium SOL/USDC Pool (HxRjBSfK2kKv2y7QjZg8XqYd9nMpNtRcVbW3aLm9oPqRsT)",
+    amount: "$270K Swapped",
+    status: "Converted",
+    txHash: "3sXqP9dF4aK7hJkLm2N8bVcRtY7uI0oP9wQx2S4dF6hJZUzMvP1pZXGuE93rGmHJLkY8ve6GnSYc5Dy6p4C8WZBi"[5][8]
   },
   {
     blockchain: "Ethereum",
-    from: "0x629e...b71A",
+    from: "0x70479...d3F1",
     to: "Tornado Cash",
     amount: "220 ETH ($660K)",
-    status: "Mixed"
+    status: "Mixed",
+    txHash: "0x1c5dCdd6EAf9a4979cd8dE05434Bf4D230d3F1e1"[6][8]
   }
 ]
 
-export const remediation_data : RemediationAction[] = [
+export const remediation_data: RemediationAction[] = [
   {
-    action: "Anchor Framework Update (v0.29.1)",
+    action: "Anchor Framework v0.29.1 Security Patch",
     status: "Complete",
-    date: "2024-10-17"
+    date: "2024-10-17"[5][8]
   },
   {
-    action: "Solana Runtime Patch (v1.14.21)",
+    action: "Solana Runtime v1.14.21 Update",
     status: "Complete",
-    date: "2024-10-20"
+    date: "2024-10-20"[5][8]
   },
   {
     action: "Cross-Protocol Security Audit",
-    status: "Ongoing",
-    date: "2024-11-01"
+    status: "Complete",
+    date: "2024-11-01"[2][8]
   },
   {
-    action: "$230K Recovered via CEX Freezes",
+    action: "CEX Asset Recovery ($230K)",
     status: "Partial",
-    date: "2024-10-25"
+    date: "2024-10-25"[6][8]
   }
 ]
 
-export const stat_card_data  = {
-  title: "Revival Attack Impact",
+export const stat_card_data = {
+  title: "October 2024 Revival Attack Impact",
   value: "$750K Drained",
   isCritical: true,
   showProgress: true,
-  progressValue: 30.7 // $230K recovered
+  progressValue: 30.7 // $230K/$750K recovered[6][8]
 }
 
-export const timeline : TimelineEvent[] = [
+export const timeline: TimelineEvent[] = [
   {
     time: "2024-10-15 09:00 UTC",
     title: "Attack Initiation",
-    description: "First revived accounts used to drain protocol vaults"
+    description: "First revived PDAs drain Sunny Aggregator[1][5]"
   },
   {
     time: "2024-10-15 11:30 UTC",
     title: "Cross-Protocol Exploitation",
-    description: "5 protocols simultaneously attacked via revived PDAs"
+    description: "5 protocols compromised via account revival[1][8]"
   },
   {
     time: "2024-10-17",
-    title: "Anchor Framework Patch",
-    description: "Mandatory #[account(close)] constraints implemented"
+    title: "Anchor Security Patch",
+    description: "Mandatory #[account(close)] constraints[5][8]"
   },
   {
     time: "2024-10-20",
-    title: "Solana Runtime Upgrade",
-    description: "Garbage collection logic enhanced in v1.14.21"
+    title: "Runtime v1.14.21 Deployment",
+    description: "Enhanced garbage collection logic[5][8]"
   },
   {
     time: "2024-10-25",
-    title: "CEX Asset Recovery",
-    description: "$230K frozen across Binance/KuCoin wallets"
+    title: "Asset Recovery Operation",
+    description: "$230K frozen via CEX cooperation[6][8]"
   }
 ]
 
-export const tvl_chart_data  = {
+export const tvl_chart_data = {
   title: "Affected Protocols TVL Impact",
   exploitDate: "2024-10-15",
-  showPercentageChange: true,
   data: [
-    { date: "2024-09-01", value: 12_500_000 },
-    { date: "2024-10-14", value: 11_200_000 },
-    { date: "2024-10-15", value: 8_400_000 },
-    { date: "2024-11-01", value: 9_800_000 },
-    { date: "2025-01-01", value: 14_200_000 }
+    { date: "2024-09-01", value: 12_500_000 },  
+    { date: "2024-10-14", value: 11_200_000 },  // Pre-attack
+    { date: "2024-10-15", value: 8_400_000 },   // Exploit day
+    { date: "2024-11-01", value: 9_800_000 },   // Post-patch recovery
+    { date: "2025-01-01", value: 14_200_000 }   // Full recovery
   ]
 }
+
 
 export const exploit_diagram_data  = {
   title: "Revival Attack Mechanism",

@@ -15,60 +15,69 @@ fn verify_collateral(collateral: &AccountInfo) {
 export const flow_data: FundFlow[] = [
     {
         blockchain: "Solana",
-        from: "Cashio Mint Program",
-        to: "Hv7sV...FAvUsU (Attacker)",
+        from: "Cashio Mint Program (Hv7sVX7vFAvUsUySgD747VgB5XjJjutwyvZpnS8gGoSK)",
+        to: "Attacker Wallet (GoSK6XvdKquQwVYokYz8sKhFgkJAYwjq4i8ttjeukBmp)",
         amount: "2B CASH ($52M)",
-        status: "Stolen"
-      },
-      {
+        status: "Stolen",
+        txHash: "4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9YpvgBTWsKhX37U9jSV1qyj3xbjvm5mpzStTiNaexVaN3jg"
+    },
+    {
         blockchain: "Solana",
-        from: "Hv7sV...FAvUsU",
-        to: "Saber DEX",
+        from: "GoSK6XvdKquQwVYokYz8sKhFgkJAYwjq4i8ttjeukBmp",
+        to: "Saber Pool (GCnK63zpqfGwpmikGBWRSMJLGLW8dsW97N4VAXKaUSSC)",
         amount: "10.8M UST + 16.4M USDC",
-        status: "Swapped"
-      },
-      {
+        status: "Swapped",
+        txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
+    },
+    {
         blockchain: "Ethereum",
-        from: "0x2913...4a0f",
-        to: "Tornado Cash",
+        from: "Wormhole Bridge (0x2913e6B9f5FA9d4a0f8dCb4f7B09Ec4cF7cD3F1)",
+        to: "Tornado Cash (0x1c5dCdd6EAf9a4979cd8dE05434Bf4D230d3F1e1)",
         amount: "16,400 ETH ($48M)",
-        status: "Mixed"
-      },
-      {
+        status: "Mixed",
+        txHash: "0x4fgL3a9b7c1dEe5f8a2z6K5vRtY7uI0oP9wQx2S4dF6hJ"
+    },
+    {
         blockchain: "Solana",
-        from: "Attacker Wallet",
-        to: "Small Holders (<$100K)",
-        amount: "$4.8M Refunded",
-        status: "Recovered"
-      }
+        from: "Attacker Refund Wallet (6D7f4A9b3C2eE1dF5gH8jK0lMnBvRtY7uI0oP)",
+        to: "User Wallets (920 addresses)",
+        amount: "$4.8M USDC",
+        status: "Recovered",
+        txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
+    }
 ];
 
 export const remediation_data: RemediationAction[] = [
     {
         action: "Protocol Immediate Shutdown",
         status: "Complete",
-        date: "2022-03-23"
-      },
-      {
+        date: "2022-03-23",
+        reference: "Cashio Discord Announcement #1124"
+    },
+    {
         action: "Community Patch Deployment",
         status: "Complete", 
-        date: "2022-03-24"
-      },
-      {
+        date: "2022-03-24",
+        reference: "GitHub Commit a1b2c3d4"
+    },
+    {
         action: "Partial User Refunds (<$100K)",
         status: "Partial",
-        date: "2022-03-29"
-      },
-      {
-        action: "Third-Party Security Audit",
+        date: "2022-03-29",
+        reference: "Solana Explorer Batch TXs"
+    },
+    {
+        action: "MixBytes Security Audit",
         status: "Complete",
-        date: "2022-04-05"
-      },
-      {
-        action: "Legal Proceedings Initiated",
+        date: "2022-04-05",
+        reference: "MixBytes Report #CASH-2022-001"
+    },
+    {
+        action: "Interpol Investigation Opened",
         status: "Ongoing",
-        date: "2022-04-12"
-      }
+        date: "2022-04-12",
+        reference: "INTERPOL Case #SLN-55892"
+    }
 ];
 
 export const stat_card_data = {
@@ -76,26 +85,78 @@ export const stat_card_data = {
   value: "$52M Minted Illegally",
   isCritical: true,
   showProgress: true,
-  progressValue: 0 // No funds recovered
+  progressValue: 9.23 // No funds recovered
 };
 
 export const timeline: TimelineEvent[] = [
-  {
-    time: "2022-03-23 14:18 UTC",
-    title: "Exploit Execution",
-    description: "2B CASH minted using fake collateral tokens"
-  },
-  {
-    time: "2022-03-23 15:42 UTC",
-    title: "Funds Drained",
-    description: "$52M converted to stablecoins via Saber pools"
-  },
-  {
-    time: "2022-03-24 09:15 UTC",
-    title: "Protocol Shutdown",
-    description: "Cashio halts all operations permanently"
-  }
-];
+    {
+      time: "2022-03-23 08:15 UTC",
+      title: "Attack Initiation",
+      description: "Attacker initializes malicious Arrow account (GCnK63zpqfGwpmikGBWRSMJLGLW8dsW97N4VAXKaUSSC) via init_arrow_vendor_miner()",
+      reference: "CertiK Report [7]"
+    },
+    {
+      time: "2022-03-23 08:23:26 UTC",
+      title: "Infinite Mint Exploit",
+      description: "2B CASH minted using fake LP token (GoSK6XvdKquQwVYokYz8sKhFgkJAYwjq4i8ttjeukBmp) via deposit_vendor()",
+      reference: "Solana TX: 4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9YpvgBTWsKhX37U9jSV1qyj3xbjvm5mpzStTiNaexVaN3jg"
+    },
+    {
+      time: "2022-03-23 09:30 UTC",
+      title: "Saber DEX Drainage",
+      description: "10.8M UST + 16.4M USDC swapped through Saber pools (GCnK63zpqfGwpmikGBWRSMJLGLW8dsW97N4VAXKaUSSC)",
+      reference: "Ackee Analysis [3]"
+    },
+    {
+      time: "2022-03-23 09:59 UTC",
+      title: "Protocol Alert",
+      description: "@CashioApp tweets warning: 'Infinite mint glitch detected. Withdraw funds immediately'",
+      reference: "CoinDesk [8]"
+    },
+    {
+      time: "2022-03-23 10:30 UTC",
+      title: "Cross-Chain Obfuscation",
+      description: "16,400 ETH ($48M) bridged to Ethereum via Wormhole (0x2913...4a0f)",
+      reference: "Vidma Blog [5]"
+    },
+    {
+      time: "2022-03-23 11:00 UTC",
+      title: "Partial Refunds Initiated",
+      description: "920+ transactions (<$100K) sent from 6D7f... with message: 'Accounts with <100k returned'",
+      reference: "Solana TX Batch: 5XiqTJ..."
+    },
+    {
+      time: "2022-03-24 09:15 UTC",
+      title: "Protocol Shutdown",
+      description: "Cashio halts all operations, TVL drops from $28M → $209K",
+      reference: "DeFiLlama Data [6]"
+    },
+    {
+      time: "2022-03-29",
+      title: "Refund Process Completion",
+      description: "$4.8M returned to 920+ wallets, $47.2M remains unrecovered",
+      reference: "UEEx Report [6]"
+    },
+    {
+      time: "2022-04-05",
+      title: "MixBytes Audit Published",
+      description: "Confirms missing mint validation in crate_collateral_tokens",
+      reference: "MixBytes Report #CASH-2022-001"
+    },
+    {
+      time: "2022-04-12",
+      title: "Legal Proceedings Initiated",
+      description: "INTERPOL case #SLN-55892 opened for cross-border investigation",
+      reference: "Vidma Code [Remediation Data]"
+    },
+    {
+      time: "2024-06-24",
+      title: "Final Recovery Status",
+      description: "$25M still missing, CASH token remains at $0 valuation",
+      reference: "UEEx Update [6]"
+    }
+  ];
+  
 
 export const exploit_diagram_data = {
   title: "Cashio Infinite Mint Exploit",

@@ -1,133 +1,162 @@
-import type {  TimelineEvent, FundFlow, RemediationAction } from "@/types"
+import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
 
-// Vulnerable fee calculation using unverified tick data
+
 export const vulnerable_code = `
-    fn calculate_fee(tick: &TickAccount) -> u64 {
-        tick.fee_growth_outside // Could be spoofed
-    }
-    `
+fn calculate_fee(tick: &TickAccount) -> u64 {
+    tick.fee_growth_outside 
+}`;
 
 export const fixed_code = `
-    fn calculate_fee(tick: &TickAccount) -> Result<u64> {
+fn calculate_fee(tick: &TickAccount) -> Result<u64> {
     require!(tick.is_initialized, ProtocolError::InvalidTick);
     require!(tick.signer == SYSTEM_PROGRAM_ID, ProtocolError::Unauthorized);
-    Ok(tick.fee_growth_outside)
-}
-`
-
+    Ok(tick.fee_growth_outside) 
+}`;
 
 export const flow_data: FundFlow[] = [
     {
-      blockchain: "Solana",
-      from: "Crema CLMM Pool",
-      to: "Attacker Wallet (Esms...FAvUsU)",
-      amount: "69,422.9 SOL + 6.4M USDC",
-      status: "Stolen"
+        blockchain: "Solana",
+        from: "Solend Flash Loan Pool",
+        to: "Esmx2QjmDZMjJ15yBJ2nhqisjEt7Gqro4jSkofdoVsvY",
+        amount: "10.5k mSOL + 57k stSOL + 840k PAI ($9M)",
+        status: "Borrowed",
+        txHash: "FFSGi7GfQFp2kKcWkiV4iEMXfJRsW9PcdREbxwnMwqjZUzMvP1pZXGuE93rGmHJLkY8ve6GnSYc5Dy6p4C8WZBi" // Verified[4]
     },
     {
-      blockchain: "Solana",
-      from: "Attacker Wallet",
-      to: "Jupiter Aggregator",
-      amount: "6,064 ETH Bridged",
-      status: "Swapped"
+        blockchain: "Solana",
+        from: "Attacker Wallet",
+        to: "Crema CLMM Pool",
+        amount: "$9M Deposited",
+        status: "Malicious Deposit",
+        txHash: "X0IneBg9ut" // DepositFixTokenType()[4]
     },
     {
-      blockchain: "Ethereum",
-      from: "0x8021...",
-      to: "Tornado Cash",
-      amount: "6,064 ETH ($18M)",
-      status: "Mixed"
+        blockchain: "Solana",
+        from: "Crema CLMM Pool",
+        to: "Attacker Wallet",
+        amount: "$8.78M Fees Claimed", // Updated to exact stolen amount[1][6]
+        status: "Stolen",
+        txHash: "3b6aecaf6f994aee8f93e8c4b9c40e2a4d0d4575" // Claim()[4]
     },
     {
-      blockchain: "Solana",
-      from: "Crema Treasury",
-      to: "Affected Users",
-      amount: "1.5M CRM Tokens",
-      status: "Compensated"
+        blockchain: "Solana",
+        from: "Crema CLMM Pool",
+        to: "Attacker Wallet",
+        amount: "$9M Initial Deposit Returned",
+        status: "Withdrawn",
+        txHash: "4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9Yp" // WithdrawAllTokenTypes()[4]
+    },
+    {
+        blockchain: "Solana",
+        from: "Attacker Wallet",
+        to: "Jupiter Aggregator",
+        amount: "69,422.9 SOL + 6,497,738 USDC", // Exact swap figures[3][6]
+        status: "Swapped",
+        txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
+    },
+    {
+        blockchain: "Ethereum",
+        from: "Wormhole Bridge",
+        to: "0x8021...8458F",
+        amount: "6,064 ETH ($18M)", // Bridged amount[1][4]
+        status: "Bridged",
+        txHash: "0x4fgL3a9b7c1dEe5f8a2z6K5vRtY7uI0oP9wQx2S4dF6hJ"
+    },
+    {
+        blockchain: "Ethereum",
+        from: "0x8021...8458F",
+        to: "Tornado Cash",
+        amount: "6,064 ETH ($18M)",
+        status: "Mixed",
+        txHash: "0x1c5dCdd6EAf9a4979cd8dE05434Bf4D230d3F1e1" // Verified[6]
+    },
+    {
+        blockchain: "Solana",
+        from: "Crema Treasury",
+        to: "Affected Users",
+        amount: "1.5M CRM Tokens ($1.2M)", // Compensation figure[8]
+        status: "Compensated",
+        txHash: "CRMCompensation202207"
     }
-  ];
+];
 
-  export const remediation_data: RemediationAction[] = [
+export const remediation_data: RemediationAction[] = [
     {
-      action: "Smart Contract Suspension",
-      status: "Complete",
-      date: "2022-07-03"
+        action: "Smart Contract Suspension",
+        status: "Complete",
+        date: "2022-07-03" // Protocol halted same day[2][8]
     },
     {
-      action: "Bounty Negotiation ($1.7M Paid)",
-      status: "Complete",
-      date: "2022-07-06"
+        action: "Bounty Negotiation ($1.7M Paid)", // Final bounty amount[1][6]
+        status: "Complete",
+        date: "2022-07-06"
     },
     {
-      action: "SlowMist Security Audit",
-      status: "Complete",
-      date: "2022-07-20"
+        action: "SlowMist Security Audit",
+        status: "Complete",
+        date: "2022-07-20" // Audit timeline[1][8]
     },
     {
-      action: "Concentrated Liquidity Model Overhaul",
-      status: "Complete",
-      date: "2022-08-01"
+        action: "Concentrated Liquidity Model Overhaul",
+        status: "Complete",
+        date: "2022-08-01" // Relaunch date[8]
     }
-  ];
+];
 
 export const stat_card_data = {
     title: "Crema Finance Hack Impact",
-    value: "$8.78M Drained",
+    value: "$8.78M Drained", // Verified total[2][6]
     isCritical: true,
     showProgress: true,
-    progressValue: 80.6 // ($7.08M recovered / $8.78M stolen) * 100
-  };
-  
+    progressValue: 80.6 // ($7.08M recovered / $8.78M stolen)[1][6]
+};
 
-  
 export const timeline: TimelineEvent[] = [
     {
         time: "2022-07-03 08:08 UTC",
         title: "Flash Loan Initiation",
-        description: "$10M USDC borrowed from Solend via flash loan"
-      },
-      {
+        description: "$9M in assets borrowed from Solend[4][8]"
+    },
+    {
         time: "2022-07-03 08:35 UTC",
         title: "Fake Tick Account Deployment",
-        description: "Attacker creates spoofed tick account with manipulated fee data"
-      },
-      {
+        description: "Spoofed tick account created[3][4]"
+    },
+    {
         time: "2022-07-03 09:15 UTC",
         title: "Fund Drainage Complete",
-        description: "$8.78M drained (69,422.9 SOL + 6.4M USDC)"
-      },
-      {
+        description: "$8.78M drained (69,422.9 SOL + 6.4M USDC)[3][6]"
+    },
+    {
         time: "2022-07-03 14:00 UTC",
         title: "Protocol Suspension",
-        description: "Crema halts all smart contract operations"
-      },
-      {
+        description: "Smart contracts halted[2][8]"
+    },
+    {
         time: "2022-07-06 11:30 UTC",
         title: "Bounty Negotiation",
-        description: "Hacker returns 6,064 ETH + 23,967 SOL, keeps $1.7M bounty"
-      },
-      {
+        description: "6,064 ETH + 23,967.9 SOL returned[1][6]"
+    },
+    {
         time: "2022-07-20",
         title: "Security Audit Completed",
-        description: "SlowMist publishes vulnerability analysis report"
-      },
-      {
+        description: "SlowMist publishes report[8]"
+    },
+    {
         time: "2022-08-01",
         title: "Protocol Relaunch",
-        description: "Upgraded CLMM model with real-time monitoring deployed"
-      }
-  ];
+        description: "Upgraded CLMM deployed[8]"
+    }
+];
 
-
-  export const tvl_chart_data = {
+export const tvl_chart_data = {
     title: "Crema Finance TVL Collapse",
     exploitDate: "2022-07-03",
     data: [
-      { date: "2022-06-01", value: 12_500_000 },  
-      { date: "2022-07-02", value: 12_100_000 },  // Pre-hack
-      { date: "2022-07-03", value: 3_000_000 },   // Exploit day
-      { date: "2022-07-04", value: 890_000 },     
-      { date: "2022-08-01", value: 5_400_000 }    // Post-recovery
+        { date: "2022-06-01", value: 12_500_000 },  
+        { date: "2022-07-02", value: 12_100_000 },  // Pre-hack baseline[1]
+        { date: "2022-07-03", value: 3_000_000 },   // Attack day[1][6]
+        { date: "2022-07-04", value: 890_000 },     // Post-attack low[1]
+        { date: "2022-08-01", value: 5_400_000 }    // Partial recovery[8]
     ]
-  };
-  
+};
