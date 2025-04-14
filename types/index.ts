@@ -21,3 +21,21 @@ export interface FundFlow {
     reference?: string
   }
   
+  export interface ExploitType {
+    name: string
+    count: number
+    percentage: number
+  }
+  
+  export interface Exploit {
+    id: string
+    protocol: string
+    type: string
+    date: string
+    amount: number
+    exploitType: string
+    technique: string
+    audited: string
+    link: string
+  }
+  

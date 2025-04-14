@@ -8,8 +8,21 @@ import { ExploitTable } from "@/components/exploit-table"
 import { ExploitStats } from "@/components/exploit-stats"
 import { ExploitTimeline } from "@/components/exploit-timeline"
 import { ExploitTypeChart } from "@/components/exploit-type-chart"
+import { exploits } from "@/data/exploits/exploits"
 
 export default function Home() {
+  // Calculate total amount hacked and number of protocols
+  const totalHacked = exploits.reduce((sum, exploit) => sum + exploit.amount, 0)
+  const uniqueProtocols = new Set(exploits.map((e) => e.protocol)).size
+
+  // Format the total amount
+  const formattedTotal = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 0,
+  }).format(totalHacked)
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -57,7 +70,9 @@ export default function Home() {
               <div className="mt-6">
                 <Card className="bg-emerald-500 text-black border-none">
                   <CardContent className="p-4">
-                    <p className="text-lg font-semibold">$511M hacked across 10 Protocols</p>
+                    <p className="text-lg font-semibold">
+                      {formattedTotal} hacked across {uniqueProtocols} Protocols
+                    </p>
                   </CardContent>
                 </Card>
               </div>
