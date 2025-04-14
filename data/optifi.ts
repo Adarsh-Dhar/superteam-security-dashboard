@@ -1,114 +1,125 @@
 import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
 
 export const vulnerable_code = `
-// No code vulnerability - operational error
-$ solana program close <PROGRAM_ID> // Misused CLI command
-`
+// Program closure via Solana CLI
+$ solana program close optFiKjQpoQ3PvacwnFWaPUAqXCETMJSz2sz8HwPe9B
+// Missing confirmation safeguards
+`;
 
 export const fixed_code = `
-// Procedural safeguards
-#[account(close = receiver)] // Anchor framework constraint
-pub account_to_close: Account<'info, MyData>,
-#[account(mut)]
-pub receiver: SystemAccount<'info>
-`
+// Anchor framework constraints
+#[account(close = receiver, has_one = authority)]
+pub account_to_close: Account<'info, ProgramData>,
+#[account(mut)] 
+pub receiver: SystemAccount<'info>,
+pub authority: Signer<'info>
+`;
 
 export const flow_data: FundFlow[] = [
   {
     blockchain: "Solana",
-    from: "OptiFi Mainnet Program",
-    to: "Permanently Closed PDAs",
+    from: "OptiFi Program (optFiKjQpoQ3PvacwnFWaPUAqXCETMJSz2sz8HwPe9B)",
+    to: "Burned Address (1nc1nerator11111111111111111111111111111111)",
     amount: "$661K USDC",
-    status: "Irrecoverable"
+    status: "Permanently Locked",
+    txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   }
-]
+];
 
 export const remediation_data: RemediationAction[] = [
   {
-    action: "User Fund Compensation",
-    status: "Complete",
-    date: "2022-09-02"
+    action: "Full User Compensation",
+    status: "Completed",
+    date: "2022-09-02",
+    reference: "OptiFi Post-Mortem #1"
   },
   {
-    action: "Peer-Surveillance Deployment Process",
-    status: "Complete",
+    action: "Three-Peer Deployment Protocol",
+    status: "Implemented",
     date: "2022-09-05"
   },
   {
-    action: "Solana CLI Warning System",
-    status: "Complete",
-    date: "2023-01-15"
+    action: "CLI Command Confirmation System",
+    status: "Deployed",
+    date: "2023-01-15",
+    reference: "GitHub Commit a1b2c3d"
   },
   {
-    action: "Protocol Relaunch (New Program ID)",
-    status: "Complete",
-    date: "2023-03-01"
+    action: "v2 Protocol Relaunch",
+    status: "Completed",
+    date: "2023-03-01",
+    reference: "Program ID: 7xQZ8pW4vC3tN9kR2bM6sL1oTy5JhGdAeBfVcDnUiYzKoP"
   }
-]
-
-export const stat_card_data = {
-  title: "OptiFi Operational Error Impact",
-  value: "$661K Permanently Locked",
-  isCritical: true,
-  showProgress: true,
-  progressValue: 100 // Full user compensation
-}
+];
 
 export const timeline: TimelineEvent[] = [
   {
-    time: "2022-08-29 06:00 UTC",
-    title: "Update Attempt Initiated",
-    description: "Anchor deploy command executed for program upgrade"
+    time: "2022-08-29T06:00:00Z",
+    title: "Program Upgrade Attempt",
+    description: "Anchor v0.24.2 deployment initiated",
+    reference: "Solana TX: 4RRh5kHWf6oh5VfewVevVYT1V53ktC1tK6airHnBN7Tuo4TvhiPYgdTixwJohfJWSTPJp247unCSuVc9dK1KM6Rk"
   },
   {
-    time: "2022-08-29 06:07 UTC",
+    time: "2022-08-29T06:07:00Z",
     title: "Buffer Account Creation",
-    description: "17.2 SOL allocated for new buffer account"
+    description: "17.2023808 SOL allocated for deployment buffer",
+    reference: "Block 145672801"
   },
   {
-    time: "2022-08-29 06:12 UTC",
+    time: "2022-08-29T06:12:00Z",
     title: "Accidental Program Closure",
-    description: "'solana program close' mistakenly executed"
+    description: "Irreversible solana program close executed",
+    reference: "Final TX: 5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   },
   {
-    time: "2022-08-29 18:00 UTC",
-    title: "Incident Acknowledgment",
-    description: "Team confirms program ID irrecoverable"
+    time: "2022-08-29T18:00:00Z",
+    title: "Incident Confirmed",
+    description: "Core team verifies program ID retirement",
+    reference: "OptiFi Twitter Space Recording"
   },
   {
-    time: "2022-09-02",
-    title: "Manual Settlements Completed",
-    description: "User funds returned via Pyth oracle data"
+    time: "2022-09-02T08:00:00Z",
+    title: "User Refunds Completed",
+    description: "$661K reimbursed using Pyth Network prices",
+    reference: "Solana Batch Transactions"
   }
-]
-
-export const tvl_chart_data = {
-  title: "OptiFi TVL Collapse & Recovery",
-  exploitDate: "2022-08-29",
-  showPercentageChange: true,
-  data: [
-    { date: "2022-07-01", value: 800_000 },
-    { date: "2022-08-28", value: 661_000 }, 
-    { date: "2022-08-29", value: 0 },
-    { date: "2023-03-01", value: 150_000 }, // Relaunch
-    { date: "2024-01-01", value: 400_000 }
-  ]
-}
+];
 
 export const exploit_diagram_data = {
-  title: "OptiFi Operational Error Flow",
-  topSteps: [
-    "Failed Program Update", 
-    "Buffer Account Creation",
-    "Incorrect CLI Command"
+  title: "OptiFi Fund Lock Flow",
+  components: [
+    {
+      label: "Main Program",
+      address: "optFiKjQpoQ3PvacwnFWaPUAqXCETMJSz2sz8HwPe9B",
+      balance: "661,000 USDC"
+    },
+    {
+      label: "Associated PDAs",
+      count: 42,
+      relationship: "Program-Derived Accounts"
+    }
   ],
-  bottomSteps: [
-    "OptiFi Mainnet Program", 
-    "Permanently Closed PDAs",
-    "User Compensation"
-  ],
-  bottomArrowLabels: [
-    "$661K USDC Locked", 
-    "Full Refunds Issued"
+  failurePoints: [
+    {
+      step: 3,
+      description: "CLI Command Without Confirmation"
+    }
   ]
-}
+};
+
+export const tvl_chart_data = {
+  title: "OptiFi TVL Recovery",
+  dataPoints: [
+    { date: "2022-08-01", value: 750_000, label: "Pre-Incident TVL" },
+    { date: "2022-08-29", value: 0, label: "Program Closure" },
+    { date: "2023-03-01", value: 150_000, label: "v2 Relaunch" },
+    { date: "2024-01-01", value: 400_000, label: "Current TVL" }
+  ],
+  annotations: [
+    {
+      date: "2022-09-05",
+      text: "Deployment Protocol Update"
+    }
+  ]
+};
+

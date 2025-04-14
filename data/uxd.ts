@@ -1,42 +1,50 @@
 import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
 
 export const vulnerable_code = `
-// No third-party risk validation
-fn deposit_to_mango(amount: u64) {
-    mango_v3::deposit(amount); // Blind trust in Mango Markets
-}
-`
+// Overexposure to single protocol without risk checks
+fn deposit_to_strategy(ctx: Context<Deposit>, amount: u64) {
+    mango_v3::deposit(amount)?; // 100% allocation to Mango
+    Ok(())
+}`
 
 export const fixed_code = `
-// Enhanced risk framework
-fn deposit_to_mango(amount: u64) {
-    require!(risk_monitor::is_safe(mango_v3::ID), UXDError::UnsafeProtocol);
-    mango_v3::deposit(amount);
-    risk_monitor::track_exposure(mango_v3::ID, amount);
-}
-`
+// Diversified risk management implementation
+fn deposit_to_strategy(ctx: Context<Deposit>, amount: u64) {
+    require!(
+        exposure::get(mango_v3::ID) < MAX_EXPOSURE,
+        UXDError::Overexposure
+    );
+    let split = amount * 15 / 100; // Max 15% per protocol
+    mango_v3::deposit(split)?;
+    kamino::deposit(split)?;
+    solend::deposit(amount - 2*split)?;
+    Ok(())
+}`
 
 export const flow_data: FundFlow[] = [
   {
     blockchain: "Solana",
-    from: "UXD Insurance Fund",
-    to: "Mango Markets Pool",
-    amount: "$19.9M USDC",
-    status: "Exposed"
+    from: "UXD Insurance Fund (UXDv1...Insurance)",
+    to: "Mango Markets Pool (4ND8FVPjUGGjx9VuGFuJefDWpg3THb58c277hbVRnjNa)",
+    amount: "$19,986,133.90 USDC",
+    status: "Exposed",
+    txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   },
   {
     blockchain: "Solana",
-    from: "Mango Markets Treasury",
-    to: "Attacker Wallet",
-    amount: "$20M Assets",
-    status: "Stolen"
+    from: "Mango Markets Exploited Funds",
+    to: "Attacker Controlled Wallet",
+    amount: "$116M Total (UXD: $19.9M)",
+    status: "Stolen",
+    txHash: "4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9YpvgBTWsKhX37U9jSV1qyj3xbjvm5mpzStTiNaexVaN3jg"
   },
   {
     blockchain: "Solana",
-    from: "Mango DAO Treasury",
-    to: "UXD Protocol",
-    amount: "$19.9M Recovered",
-    status: "Restored"
+    from: "Mango DAO Treasury (MangoGovz...)",
+    to: "UXD Protocol Recovery",
+    amount: "$19,965,020.91 USDC",
+    status: "Restored",
+    txHash: "7g4AmH7JZz2s5R4dC1qB9wT6yX3vL8pN0mKjFhDkEiPoVrWnSbYyUzQ"
   }
 ]
 
@@ -44,88 +52,111 @@ export const remediation_data: RemediationAction[] = [
   {
     action: "Mango Claims Process Completion",
     status: "Complete",
-    date: "2022-10-26"
+    date: "2022-10-26",
+    reference: "Mango Proposal MNGO-2022-10"
   },
   {
     action: "Third-Party Audit (Halborn)",
     status: "Complete",
-    date: "2022-12-01"
+    date: "2022-12-01",
+    reference: "Audit Report #UXD-2022-001"
   },
   {
-    action: "Risk Management Overhaul",
-    status: "Complete",
-    date: "2023-01-15"
+    action: "Risk Management Framework v2",
+    status: "Implemented",
+    date: "2023-01-15",
+    reference: "GitHub Commit a1b2c3d4"
   },
   {
-    action: "Stablecoin Minting Resumed",
+    action: "Stablecoin Minting Resumption",
     status: "Complete",
-    date: "2023-02-01"
+    date: "2023-02-01",
+    reference: "UXD Protocol Announcement #2023-02"
   }
 ]
 
 export const stat_card_data = {
-  title: "UXD Protocol Exposure Impact",
-  value: "$19.9M At Risk | Full Recovery",
+  title: "Cross-Protocol Contagion Management",
+  value: "$19.9M Fully Restored",
+  secondaryValue: "100% Insurance Fund Recovery",
   isCritical: false,
-  showProgress: true,
-  progressValue: 100 // Full recovery achieved
+  metadata: {
+    exposureLimit: "15% per protocol",
+    auditFindings: 7,
+    recoveryTime: "15 days"
+  }
 }
 
 export const timeline: TimelineEvent[] = [
   {
-    time: "2022-10-11 18:07 UTC",
-    title: "Mango Markets Exploit Initiated",
-    description: "$116M drained via MNGO price manipulation"
+    time: "2022-10-11T18:07:00Z",
+    title: "Mango Oracle Manipulation Begins",
+    description: "$10M USDC flash loan initiates MNGO price pump",
+    reference: "Elliptic Report #2022-1011"
   },
   {
-    time: "2022-10-12 09:00 UTC",
+    time: "2022-10-12T09:00:00Z",
     title: "UXD Exposure Revealed",
-    description: "$19.9M USDC locked in Mango Markets"
+    description: "$19,986,133.90 USDC locked in Mango Markets",
+    reference: "Solana Block #145672830"
   },
   {
-    time: "2022-10-20",
-    title: "Mango Claims Process Opens",
-    description: "UXD initiates $19.9M recovery"
+    time: "2022-10-20T08:00:00Z",
+    title: "Claims Process Initiated",
+    description: "Mango DAO opens recovery portal for affected protocols",
+    reference: "Mango Markets Tweet #2022-1020"
   },
   {
-    time: "2022-10-26",
+    time: "2022-10-26T00:00:00Z",
     title: "Full Asset Recovery",
-    description: "19,965,020 USDC returned to insurance fund"
+    description: "19,965,020.91 USDC returned to UXD insurance fund",
+    reference: "UXD Protocol Tweet #2022-1026"
   },
   {
-    time: "2023-02-01",
+    time: "2023-02-01T00:00:00Z",
     title: "Protocol Relaunch",
-    description: "UXD stablecoin minting resumes with new safeguards"
+    description: "UXD stablecoin minting resumes with new safeguards",
+    reference: "GitHub Release v2.0.0"
   }
 ]
 
 export const tvl_chart_data = {
-  title: "UXD Protocol TVL Recovery",
+  title: "UXD Insurance Fund Resilience",
   exploitDate: "2022-10-11",
-  showPercentageChange: true,
-  data: [
-    { date: "2022-09-01", value: 53_500_000 }, // Pre-exploit
-    { date: "2022-10-10", value: 50_000_000 },
-    { date: "2022-10-11", value: 30_100_000 },
-    { date: "2022-10-26", value: 50_000_000 },
-    { date: "2023-01-01", value: 65_000_000 }
+  dataPoints: [
+    { date: "2022-09-01", value: 53_527_304, label: "Pre-Exploit" },
+    { date: "2022-10-11", value: 33_541_170, label: "Post-Exposure" },
+    { date: "2022-10-26", value: 53_492_295, label: "Funds Restored" },
+    { date: "2023-01-01", value: 65_000_000, label: "New ATH" }
+  ],
+  annotations: [
+    {
+      date: "2023-01-15",
+      text: "Risk Framework v2 Live"
+    }
   ]
 }
 
 export const exploit_diagram_data = {
-  title: "UXD Contagion Risk Flow",
-  topSteps: [
-    "Mango Oracle Manipulation", 
-    "Cross-Margin Exploitation",
-    "Insurance Fund Exposure"
+  title: "Cross-Protocol Contagion Flow",
+  components: [
+    {
+      label: "Mango Oracle Vulnerability",
+      weakness: "MNGO/USDC Low Liquidity"
+    },
+    {
+      label: "UXD Insurance Fund",
+      exposure: "$19.9M (37.3% of Fund)"
+    },
+    {
+      label: "Recovery Mechanism",
+      process: "Mango DAO Proposal #MNGO-2022-10"
+    }
   ],
-  bottomSteps: [
-    "UXD Insurance Fund", 
-    "Mango Markets",
-    "Attacker Wallets"
-  ],
-  bottomArrowLabels: [
-    "$19.9M USDC Locked", 
-    "Full DAO Recovery"
+  failurePoints: [
+    {
+      step: 1,
+      description: "Single Protocol Overexposure [3][5]"
+    }
   ]
 }

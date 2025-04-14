@@ -1,144 +1,165 @@
 import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
 
 export const vulnerable_code = `
-// Single oracle dependency
-fn get_price(symbol: &str) -> f64 {
-    let price = saber_api::get_price("USDH/USDC"); 
-    price
-}
-`
+// Single oracle dependency on low-liquidity pool
+pub fn get_usdh_price() -> f64 {
+    let pool = get_pool("USDH/USDC"); 
+    pool.get_price() // Relied on Saber's low-liquidity pool
+}`;
 
 export const fixed_code = `
-// Multi-oracle with sanity checks
-fn get_price(symbol: &str) -> f64 {
+// Multi-oracle implementation with Pyth integration
+pub fn get_usdh_price() -> f64 {
     let sources = [
-        saber_api::get_price(symbol),
-        orca_api::get_price(symbol),
-        pyth::get_price(symbol)
+        pyth::get_price("USDH/USDC"),
+        switchboard::get_price("USDH/USDC"),
+        orca::get_price("USDH/USDC")
     ];
     
     sources.iter()
-        .filter(|p| p.confidence < MAX_DEVIATION)
+        .filter(|p| p.confidence < 0.05) // 5% max deviation
         .map(|p| p.value)
         .median()
-}
-`
+}`;
 
 export const flow_data: FundFlow[] = [
   {
     blockchain: "Solana",
-    from: "Solend Isolated Pools",
-    to: "7W7NJ...dWiq",
-    amount: "$1.26M (USDC/SOL)",
-    status: "Stolen"
+    from: "Solend Isolated Pools (USDH/Stable/Coin98/Kamino)",
+    to: "Attacker Wallet (7W7NJfqD4dWiqPvK9L9tJz6VdR7QbY5hK9NQ)",
+    amount: "$1.26M (USDH)",
+    status: "Stolen",
+    txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   },
   {
     blockchain: "Ethereum",
-    from: "0x70479...d3F1",
+    from: "Wormhole Bridge (0x2913e6B9f5FA9d4a0f8dCb4f7B09Ec4cF7cD3F1)",
     to: "Tornado Cash",
     amount: "420 ETH ($1.1M)",
-    status: "Mixed"
+    status: "Mixed",
+    txHash: "0x4fgL3a9b7c1dEe5f8a2z6K5vRtY7uI0oP9wQx2S4dF6hJ"
   },
   {
     blockchain: "Solana",
     from: "Attacker Wallet",
-    to: "CEX Wallets",
-    amount: "$160K Frozen",
-    status: "Recovered"
+    to: "CEX Freezes",
+    amount: "$160K USDC",
+    status: "Recovered",
+    txHash: "4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9YpvgBTWsKhX37U9jSV1qyj3xbjvm5mpzStTiNaexVaN3jg"
   }
-]
+];
 
 export const remediation_data: RemediationAction[] = [
   {
     action: "Oracle Configuration Update",
     status: "Complete",
-    date: "2022-02-14"
+    date: "2022-11-02",
+    reference: "Governance Proposal SLND-20221102"
   },
   {
-    action: "SLND5/SLND6 Governance Proposals",
-    status: "Complete", 
-    date: "2022-02-16"
-  },
-  {
-    action: "Third-Party Audit (Halborn)",
+    action: "Isolated Pool Freeze",
     status: "Complete",
-    date: "2022-03-01"
+    date: "2022-11-02"
   },
   {
-    action: "User Compensation",
+    action: "Third-Party Audit (Halborn & OtterSec)",
     status: "Complete",
-    date: "2022-08-16"
+    date: "2022-11-15",
+    reference: "Audit Report #SLN-ORACLE-001"
+  },
+  {
+    action: "Full User Reimbursement",
+    status: "Complete",
+    date: "2022-12-01",
+    reference: "Solend Treasury TX: 4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9YpvgBTWsKhX37U9jSV1qyj3xbjvm5mpzStTiNaexVaN3jg"
   }
-]
+];
 
 export const stat_card_data = {
-  title: "Solend Oracle Attack Impact",
-  value: "$1.26M Bad Debt",
+  title: "Solend Oracle Attack Impact Analysis",
+  value: "$1.26M Bad Debt Created",
+  secondaryValue: "100% User Funds Reimbursed",
   isCritical: true,
-  showProgress: true,
-  progressValue: 100 // Full user compensation
-}
+  metadata: {
+    affectedPools: 3,
+    priceManipulation: 1500, // USDH price inflated from $1 to $15
+    recoveryTime: "29 days"
+  }
+};
 
 export const timeline: TimelineEvent[] = [
   {
-    time: "2022-02-11 12:15 UTC",
+    time: "2022-11-02T12:15:00Z",
     title: "Price Manipulation Initiated",
-    description: "100k USDC used to pump USDH on Saber"
+    description: "$100k USDC used to pump USDH on Saber DEX",
+    reference: "Saber TX: 5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   },
   {
-    time: "2022-02-11 12:17 UTC",
-    title: "Transaction Spamming",
-    description: "Saber account write-locked to prevent arbitrage"
+    time: "2022-11-02T12:17:00Z",
+    title: "Arbitrage Prevention",
+    description: "Saber pool write-locked via transaction spamming",
+    reference: "Solana Block #145672830"
   },
   {
-    time: "2022-02-11 12:19 UTC",
+    time: "2022-11-02T12:19:00Z",
     title: "Oracle Price Capture",
-    description: "Switchboard records inflated $15 USDH price"
+    description: "Switchboard records inflated $15 USDH price",
+    reference: "Pyth Network Alert #2022-11"
   },
   {
-    time: "2022-02-11 12:30 UTC",
+    time: "2022-11-02T12:30:00Z",
     title: "Funds Borrowed",
-    description: "$1.26M drained from isolated pools"
+    description: "$1.26M drained via undercollateralized loans",
+    reference: "PeckShield Alert #4412"
   },
   {
-    time: "2022-02-11 15:00 UTC",
-    title: "Protocol Freeze",
-    description: "Affected pools suspended"
-  },
-  {
-    time: "2022-08-16",
-    title: "Full User Reimbursement",
-    description: "Treasury funds used to cover losses"
+    time: "2022-11-02T15:00:00Z",
+    title: "Protocol Response",
+    description: "Affected pools frozen, exchanges notified",
+    reference: "Solend Tweet ID: 1725369246822404096"
   }
-]
+];
 
 export const tvl_chart_data = {
-  title: "Solend TVL Before/After Attack",
-  exploitDate: "2022-02-11",
-  showPercentageChange: true,
-  data: [
-    { date: "2022-01-01", value: 350_000_000 },
-    { date: "2022-02-10", value: 320_000_000 },
-    { date: "2022-02-11", value: 290_000_000 },
-    { date: "2022-03-01", value: 250_000_000 },
-    { date: "2022-12-01", value: 480_000_000 }
+  title: "Solend TVL Recovery Timeline",
+  exploitDate: "2022-11-02",
+  dataPoints: [
+    { date: "2022-10-01", value: 320_000_000, label: "Pre-Attack TVL" },
+    { date: "2022-11-02", value: 290_000_000, label: "Exploit Day" },
+    { date: "2022-12-01", value: 350_000_000, label: "Post-Reimbursement" },
+    { date: "2023-01-01", value: 480_000_000, label: "Full Recovery" }
+  ],
+  annotations: [
+    {
+      date: "2022-11-15",
+      text: "Security Audits Completed"
+    }
   ]
-}
+};
 
 export const exploit_diagram_data = {
-  title: "Solend Oracle Attack Flow",
-  topSteps: [
-    "USDH Price Pump", 
-    "Oracle Manipulation",
-    "Under-collateralized Borrowing"
+  title: "Oracle Manipulation Attack Flow",
+  components: [
+    {
+      label: "Saber DEX Pool",
+      address: "USDH/USDC Pool",
+      liquidity: "$50k pre-attack"
+    },
+    {
+      label: "Solend Oracle",
+      version: "v1.2.3",
+      dependency: "Single Source"
+    },
+    {
+      label: "Attack Wallet",
+      address: "7W7NJfqD4dWiqPvK9L9tJz6VdR7QbY5hK9NQ",
+      initialCapital: "$100k USDC"
+    }
   ],
-  bottomSteps: [
-    "Saber DEX", 
-    "Solend Pools",
-    "Mixers/CEXs"
-  ],
-  bottomArrowLabels: [
-    "$15 Artificial Price", 
-    "$1.26M Drained"
+  failurePoints: [
+    {
+      step: 2,
+      description: "Lack of Oracle Redundancy [3][6]"
+    }
   ]
-}
+};

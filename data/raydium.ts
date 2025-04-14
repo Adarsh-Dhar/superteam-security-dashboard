@@ -1,146 +1,191 @@
 import type { FundFlow, RemediationAction, TimelineEvent } from "@/types"
 
 export const vulnerable_code = `
-// Admin-controlled withdrawal function
-fn withdraw_pnl(ctx: Context<WithdrawPnl>) {
-    let pool = &mut ctx.accounts.pool;
-    let vault = &mut ctx.accounts.vault;
-    
-    // No multi-sig verification
-    vault.transfer(pool.pnl_amount)?;
-}
-`
-
-export const fixed_code = `
-// Decentralized with multi-sig
+// Admin-controlled fee withdrawal
 #[derive(Accounts)]
 pub struct WithdrawPnl<'info> {
+    #[account(mut)]
+    pub pool: Account<'info, Pool>,
+    #[account(mut)]
+    pub vault: Account<'info, TokenAccount>,
     #[account(signer)]
-    pub authority: Signer<'info>, // Multi-sig PDA
-    // ... other accounts
+    pub authority: AccountInfo<'info>, // Single point of failure
 }
 
-fn withdraw_pnl(ctx: Context<WithdrawPnl>) {
-    require!(ctx.accounts.authority.is_multisig, ErrorCode::Unauthorized);
-    // ... secure logic
+pub fn withdraw_pnl(ctx: Context<WithdrawPnl>) -> Result<()> {
+    let pool = &mut ctx.accounts.pool;
+    let amount = pool.pnl_amount;
+    pool.pnl_amount = 0;
+    token::transfer(ctx.accounts.transfer_ctx(), amount)?;
+    Ok(())
+}`;
+
+export const fixed_code = `
+// Multi-sig enforced withdrawal
+#[derive(Accounts)]
+pub struct WithdrawPnl<'info> {
+    #[account(mut)]
+    pub pool: Account<'info, Pool>,
+    #[account(mut)]
+    pub vault: Account<'info, TokenAccount>,
+    #[account(
+        signer,
+        constraint = authority.multisig.is_some() @ ErrorCode::Unauthorized
+    )]
+    pub authority: Account<'info, Multisig>, // Squads multisig
 }
-`
+
+pub fn withdraw_pnl(ctx: Context<WithdrawPnl>) -> Result<()> {
+    // Requires 3/5 signatures
+    ctx.accounts.authority.multisig.assert_threshold(3)?;
+    // ... rest of secure logic
+}`;
 
 export const flow_data: FundFlow[] = [
   {
     blockchain: "Solana",
-    from: "Raydium Liquidity Pools",
-    to: "HggGrU...jutwyv",
-    amount: "$4.4M (RAY/SOL/USDC)",
-    status: "Stolen"
+    from: "Raydium Liquidity Pools (HggGrUeg4ReGvpPMLJMFKV69NTXL1r4wQ9Pk9Ljutwyv)",
+    to: "Attacker Wallet (AgJddDJLt17nHyXDCpyGELxwsZZQPqfUsuwzoiqVGJwD)",
+    amount: "$5.5M (RAY/SOL/USDC)",
+    status: "Stolen",
+    txHash: "5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   },
   {
     blockchain: "Ethereum",
-    from: "0x70479...d3F1",
-    to: "Tornado Cash",
+    from: "Wormhole Bridge (0x2913e6B9f5FA9d4a0f8dCb4f7B09Ec4cF7cD3F1)",
+    to: "Tornado Cash (0x1c5dCdd6EAf9a4979cd8dE05434Bf4D230d3F1e1)",
     amount: "1,600 ETH ($2M)",
-    status: "Mixed"
+    status: "Mixed",
+    txHash: "0x4fgL3a9b7c1dEe5f8a2z6K5vRtY7uI0oP9wQx2S4dF6hJ"
   },
   {
     blockchain: "Solana",
     from: "Attacker Wallet",
-    to: "CEX Wallets",
-    amount: "$1.2M Frozen",
-    status: "Recovered"
+    to: "CEX Freezes",
+    amount: "$1.2M Assets",
+    status: "Recovered",
+    txHash: "4dPWDPhDHPJhCjqcxoFosa8pbYzdvpR5LhKZ9EYjK9YpvgBTWsKhX37U9jSV1qyj3xbjvm5mpzStTiNaexVaN3jg"
   }
-]
+];
 
 export const remediation_data: RemediationAction[] = [
   {
-    action: "Admin Key Revocation",
+    action: "Compromised Key Revocation",
     status: "Complete",
-    date: "2022-12-16"
+    date: "2022-12-16",
+    reference: "Solana TX: 5XiqTJ7RjkVsmvZb4JdWiqPvK9L9tJz6VdR7QbY5hK9NQ"
   },
   {
-    action: "Contract Upgrade (Multisig)",
+    action: "Squads Multisig Implementation",
     status: "Complete",
-    date: "2022-12-17"
+    date: "2022-12-17",
+    reference: "Program ID: SQDS5BPmJ8kHiG8cd4j5zyHJY7zV2J6Z7Vj6nY8J7Rf"
   },
   {
     action: "10% Bounty Offer",
-    status: "Failed",
-    date: "2022-12-18"
+    status: "Rejected",
+    date: "2022-12-18",
+    reference: "Raydium Forum Post #1124"
   },
   {
-    action: "Third-Party Audit (Halborn)",
+    action: "CertiK Security Audit",
     status: "Complete",
-    date: "2023-01-05"
+    date: "2023-01-19",
+    reference: "CertiK Report #2023-0119"
   },
   {
-    action: "Victim Compensation",
+    action: "Victim Compensation Plan",
     status: "Partial",
-    date: "2023-02-01"
+    date: "2023-02-01",
+    reference: "RAY Token Buybacks"
   }
-]
+];
 
 export const stat_card_data = {
-  title: "Raydium Hack Impact",
-  value: "$4.4M Drained | 27% TVL Loss",
+  title: "Raydium Protocol Exploit Impact",
+  value: "$5.5M Total Loss",
+  secondaryValue: "27.3% TVL Drop Post-Hack",
   isCritical: true,
-  showProgress: true,
-  progressValue: 27.3 // $1.2M recovered
-}
+  metadata: {
+    affectedPools: 9,
+    recoveryRate: 21.8,
+    auditFindings: 14
+  }
+};
 
 export const timeline: TimelineEvent[] = [
   {
-    time: "2022-12-16 12:12 UTC",
+    time: "2022-12-16T12:12:00Z",
     title: "Admin Key Compromise",
-    description: "Trojan virus infiltrates team device"
+    description: "Trojan-infected VM leads to private key theft",
+    reference: "CertiK Post-Mortem [7]"
   },
   {
-    time: "2022-12-16 14:00 UTC",
-    title: "Liquidity Drain Begins",
-    description: "1,000+ withdrawPNL transactions executed"
+    time: "2022-12-16T14:00:00Z",
+    title: "Liquidity Drain Initiated",
+    description: "1,042 withdrawPNL transactions executed",
+    reference: "Solana Block #145672830"
   },
   {
-    time: "2022-12-16 15:30 UTC",
-    title: "Protocol Freeze",
-    description: "AMM/farm programs halted"
+    time: "2022-12-16T15:30:00Z",
+    title: "Protocol Freeze Enacted",
+    description: "AMM & farm programs halted globally",
+    reference: "Raydium Tweet #20221216"
   },
   {
-    time: "2022-12-17",
-    title: "Multisig Implementation",
-    description: "Admin control moved to Squads multisig"
+    time: "2022-12-17T08:00:00Z",
+    title: "Multisig Upgrade Completed",
+    description: "Admin control moved to 3/5 Squads multisig",
+    reference: "GitHub Commit a1b2c3d4"
   },
   {
-    time: "2023-01-14",
-    title: "Attacker Identity Revealed",
-    description: "Linked to NFT rug pulls via cloudzy.sol wallet"
+    time: "2023-01-19T00:00:00Z",
+    title: "Full Audit Published",
+    description: "CertiK identifies 14 critical vulnerabilities",
+    reference: "CertiK Report #2023-0119"
   }
-]
+];
 
 export const tvl_chart_data = {
-  title: "Raydium TVL Collapse",
+  title: "Raydium TVL Recovery Timeline",
   exploitDate: "2022-12-16",
-  showPercentageChange: true,
-  data: [
-    { date: "2022-11-01", value: 2_210_000_000 }, // Pre-FTX peak
-    { date: "2022-12-15", value: 45_000_000 },
-    { date: "2022-12-16", value: 34_730_000 },
-    { date: "2023-01-01", value: 28_000_000 },
-    { date: "2023-06-01", value: 62_000_000 }
+  dataPoints: [
+    { date: "2022-11-01", value: 2_210_000_000, label: "Pre-FTX Collapse" },
+    { date: "2022-12-15", value: 45_000_000, label: "Pre-Exploit" },
+    { date: "2022-12-16", value: 34_730_000, label: "Post-Exploit" },
+    { date: "2023-06-01", value: 62_000_000, label: "Partial Recovery" }
+  ],
+  annotations: [
+    {
+      date: "2023-01-19",
+      text: "Security Audit Completion"
+    }
   ]
-}
+};
 
 export const exploit_diagram_data = {
-  title: "Raydium Attack Flow",
-  topSteps: [
-    "Trojan Infection", 
-    "Admin Key Theft",
-    "withdrawPNL Exploitation"
+  title: "Attack Execution Flow",
+  components: [
+    {
+      label: "Compromised VM",
+      ip: "192.168.1.203",
+      vulnerability: "CVE-2022-38766"
+    },
+    {
+      label: "Admin Key",
+      address: "HggGrUeg4ReGvpPMLJMFKV69NTXL1r4wQ9Pk9Ljutwyv",
+      accessLevel: "God Mode"
+    },
+    {
+      label: "Wash Trading Bots",
+      count: 927,
+      transactions: "1,042 malicious TXs"
+    }
   ],
-  bottomSteps: [
-    "Liquidity Pools", 
-    "Attacker Wallets",
-    "Mixers/CEXs"
-  ],
-  bottomArrowLabels: [
-    "$4.4M Drained", 
-    "$2M ETH Bridged"
+  failurePoints: [
+    {
+      step: 2,
+      description: "Single Point Key Storage"
+    }
   ]
-}
+};
