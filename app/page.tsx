@@ -8,7 +8,7 @@ import { ExploitTable } from "@/components/exploit-table"
 import { ExploitStats } from "@/components/exploit-stats"
 import { ExploitTimeline } from "@/components/exploit-timeline"
 import { ExploitTypeChart } from "@/components/exploit-type-chart"
-import { exploits } from "@/data/exploits/exploits"
+import { exploits } from "@/data/exploits"
 
 export default function Home() {
   // Calculate total amount hacked and number of protocols
