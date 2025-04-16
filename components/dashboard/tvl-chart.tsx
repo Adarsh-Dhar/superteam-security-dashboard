@@ -59,10 +59,32 @@ export function TVLChart({
   const maxValue = Math.max(...values)
   const minValue = Math.min(...values)
 
+  // Determine appropriate value scaling based on data range
+  let valueStep, valuePrefix
+  if (maxValue >= 1_000_000_000) {
+    valueStep = 500_000_000 // 500M steps for billion+ values
+    valuePrefix = "B"
+  } else if (maxValue >= 100_000_000) {
+    valueStep = 100_000_000 // 100M steps
+    valuePrefix = "M"
+  } else if (maxValue >= 10_000_000) {
+    valueStep = 10_000_000 // 10M steps
+    valuePrefix = "M"
+  } else if (maxValue >= 1_000_000) {
+    valueStep = 1_000_000 // 1M steps
+    valuePrefix = "M"
+  } else if (maxValue >= 100_000) {
+    valueStep = 100_000 // 100K steps
+    valuePrefix = "K"
+  } else {
+    valueStep = 10_000 // 10K steps
+    valuePrefix = "K"
+  }
+
   // Add some padding to the max value for better visualization
-  const paddedMax = Math.ceil(maxValue / 500000000) * 500000000
+  const paddedMax = Math.ceil(maxValue / valueStep) * valueStep
   // Ensure we show zero if values are close to it
-  const paddedMin = minValue < maxValue * 0.2 ? 0 : Math.floor(minValue / 500000000) * 500000000
+  const paddedMin = minValue < maxValue * 0.2 ? 0 : Math.floor(minValue / valueStep) * valueStep
 
   const valueRange = paddedMax - paddedMin
 
@@ -103,11 +125,13 @@ export function TVLChart({
       return `$${(value / 1000000000).toFixed(1)}B`
     } else if (value >= 1000000) {
       return `$${(value / 1000000).toFixed(1)}M`
+    } else if (value >= 1000) {
+      return `$${(value / 1000).toFixed(1)}K`
     }
     return `$${value.toLocaleString()}`
   }
 
-  // Format date labels - ensure unique labels
+  // Format date labels
   const formatDate = (date: string): string => {
     const dateObj = new Date(date)
     return dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" })
@@ -125,70 +149,164 @@ export function TVLChart({
     })
   }
 
-  // Generate tick marks for x-axis (show ~4 tick marks)
-  // Ensure unique dates by using a Set to track formatted dates
+  // Generate tick marks for x-axis (show ~4-6 tick marks)
   const xTicks = []
-  const usedDates = new Set()
-  const tickCount = Math.min(data.length, 4)
-
+  const tickCount = Math.min(data.length, Math.max(4, Math.min(6, Math.floor(data.length / 3))))
+  
   for (let i = 0; i < tickCount; i++) {
     const index = Math.floor((i * (data.length - 1)) / (tickCount - 1))
     const item = data[index]
-    const formattedDate = formatDate(item.date)
-
-    // Only add the date if it hasn't been used yet
-    if (!usedDates.has(formattedDate)) {
-      usedDates.add(formattedDate)
-      xTicks.push({
-        date: item.date,
-        x: scaleX(item.date),
-        label: formattedDate,
-      })
-    }
+    xTicks.push({
+      date: item.date,
+      x: scaleX(item.date),
+      label: formatDate(item.date),
+    })
   }
 
   // Calculate exploit point x position
   const exploitX = scaleX(exploitDate)
 
   return (
-    <div className="w-full h-64">
+    <div className="w-full h-80">
       <div className="text-center font-semibold mb-2">{title}</div>
+      {showPercentageChange && lastBeforeExploit && firstAfterExploit && (
+        <div className="text-center text-sm mb-1">
+          Impact: {percentageChange.toFixed(1)}% change (
+          {formatCurrency(lastBeforeExploit.value)} → {formatCurrency(firstAfterExploit.value)})
+        </div>
+      )}
 
-      <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <svg viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
         {/* Chart axes */}
-        <line x1="50" y1="250" x2="350" y2="250" stroke="hsl(var(--muted-foreground))" strokeWidth="2" />
-        <line x1="50" y1="250" x2="50" y2="50" stroke="hsl(var(--muted-foreground))" strokeWidth="2" />
+        <line 
+          x1={marginLeft} 
+          y1={marginTop + chartHeight} 
+          x2={marginLeft + chartWidth} 
+          y2={marginTop + chartHeight} 
+          stroke="hsl(var(--muted-foreground))" 
+          strokeWidth="1" 
+        />
+        <line 
+          x1={marginLeft} 
+          y1={marginTop + chartHeight} 
+          x2={marginLeft} 
+          y2={marginTop} 
+          stroke="hsl(var(--muted-foreground))" 
+          strokeWidth="1" 
+        />
         
-        {/* Y-axis labels */}
-        <text x="45" y="250" textAnchor="end" fontSize="12" fill="hsl(var(--foreground))">$0</text>
-        <text x="45" y="200" textAnchor="end" fontSize="12" fill="hsl(var(--foreground))">$500M</text>
-        <text x="45" y="150" textAnchor="end" fontSize="12" fill="hsl(var(--foreground))">$1B</text>
-        <text x="45" y="100" textAnchor="end" fontSize="12" fill="hsl(var(--foreground))">$1.5B</text>
-        <text x="45" y="50" textAnchor="end" fontSize="12" fill="hsl(var(--foreground))">$2B</text>
+        {/* Y-axis ticks and labels */}
+        {yTicks.map((tick, i) => (
+          <g key={`y-tick-${i}`}>
+            <line 
+              x1={marginLeft - 5} 
+              y1={tick.y} 
+              x2={marginLeft} 
+              y2={tick.y} 
+              stroke="hsl(var(--muted-foreground))" 
+              strokeWidth="1" 
+            />
+            <text 
+              x={marginLeft - 8} 
+              y={tick.y + 4} 
+              textAnchor="end" 
+              fontSize="10" 
+              fill="hsl(var(--foreground))"
+            >
+              {tick.label}
+            </text>
+          </g>
+        ))}
         
-        {/* X-axis labels */}
-        <text x="90" y="270" textAnchor="middle" fontSize="12" fill="hsl(var(--foreground))">Jan 30</text>
-        <text x="160" y="270" textAnchor="middle" fontSize="12" fill="hsl(var(--foreground))">Feb 1</text>
-        <text x="230" y="270" textAnchor="middle" fontSize="12" fill="hsl(var(--foreground))">Feb 3</text>
-        <text x="300" y="270" textAnchor="middle" fontSize="12" fill="hsl(var(--foreground))">Feb 5</text>
+        {/* X-axis ticks and labels */}
+        {xTicks.map((tick, i) => (
+          <g key={`x-tick-${i}`}>
+            <line 
+              x1={tick.x} 
+              y1={marginTop + chartHeight} 
+              x2={tick.x} 
+              y2={marginTop + chartHeight + 5} 
+              stroke="hsl(var(--muted-foreground))" 
+              strokeWidth="1" 
+            />
+            <text 
+              x={tick.x} 
+              y={marginTop + chartHeight + 20} 
+              textAnchor="middle" 
+              fontSize="10" 
+              fill="hsl(var(--foreground))"
+            >
+              {tick.label}
+            </text>
+          </g>
+        ))}
         
-        {/* TVL graph */}
-        <path d="M50,100 L90,80 L130,90 L160,85 L200,230 L230,220 L270,210 L300,190 L350,170" 
-              stroke="hsl(var(--primary))" strokeWidth="3" fill="none" />
+        {/* Grid lines (optional) */}
+        {yTicks.map((tick, i) => (
+          <line 
+            key={`grid-y-${i}`}
+            x1={marginLeft} 
+            y1={tick.y} 
+            x2={marginLeft + chartWidth} 
+            y2={tick.y} 
+            stroke="hsl(var(--muted-foreground))" 
+            strokeWidth="0.5" 
+            strokeDasharray="2,2" 
+            opacity="0.3"
+          />
+        ))}
         
-        {/* Exploit marker */}
-        <line x1="200" y1="50" x2="200" y2="250" stroke="hsl(var(--destructive))" strokeWidth="2" strokeDasharray="5,5" />
-        <text x="200" y="40" textAnchor="middle" fontSize="12" fill="hsl(var(--destructive))">Exploit</text>
+        {/* TVL graph lines */}
+        {beforeExploit.length > 1 && (
+          <path 
+            d={beforePath} 
+            stroke="hsl(var(--primary))" 
+            strokeWidth="2" 
+            fill="none" 
+          />
+        )}
+        
+        {afterExploit.length > 1 && (
+          <path 
+            d={afterPath} 
+            stroke="hsl(var(--primary))" 
+            strokeWidth="2" 
+            fill="none" 
+            strokeDasharray={afterExploit[0].date !== exploitDate ? "none" : "none"}
+          />
+        )}
         
         {/* Data points */}
-        <circle cx="90" cy="80" r="4" fill="hsl(var(--primary))" />
-        <circle cx="130" cy="90" r="4" fill="hsl(var(--primary))" />
-        <circle cx="160" cy="85" r="4" fill="hsl(var(--primary))" />
-        <circle cx="200" cy="230" r="4" fill="hsl(var(--destructive))" />
-        <circle cx="230" cy="220" r="4" fill="hsl(var(--primary))" />
-        <circle cx="270" cy="210" r="4" fill="hsl(var(--primary))" />
-        <circle cx="300" cy="190" r="4" fill="hsl(var(--primary))" />
-        <circle cx="350" cy="170" r="4" fill="hsl(var(--primary))" />
+        {data.map((point, i) => (
+          <circle 
+            key={`point-${i}`}
+            cx={scaleX(point.date)} 
+            cy={scaleY(point.value)} 
+            r="4" 
+            fill={point.date === exploitDate ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
+          />
+        ))}
+        
+        {/* Exploit marker */}
+        <line 
+          x1={exploitX} 
+          y1={marginTop} 
+          x2={exploitX} 
+          y2={marginTop + chartHeight} 
+          stroke="hsl(var(--destructive))" 
+          strokeWidth="1.5" 
+          strokeDasharray="4,3" 
+        />
+        <text 
+          x={exploitX} 
+          y={marginTop - 10} 
+          textAnchor="middle" 
+          fontSize="11" 
+          fontWeight="bold"
+          fill="hsl(var(--destructive))"
+        >
+          Exploit
+        </text>
       </svg>
     </div>
   )
