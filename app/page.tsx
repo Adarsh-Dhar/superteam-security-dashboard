@@ -185,11 +185,8 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Button className="gap-1">
+                <Button>
                   View on GitHub <ExternalLinkIcon className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" className="gap-1">
-                  Submit an Exploit <ArrowRightIcon className="h-4 w-4" />
                 </Button>
               </div>
             </div>

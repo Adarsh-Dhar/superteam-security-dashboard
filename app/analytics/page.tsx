@@ -1,7 +1,11 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExploitTypeChart } from "@/components/exploit-type-chart"
 
 import { exploits } from "@/data/exploits";
+import { Button } from "@/components/ui/button";
+import { ArrowLeftIcon } from "lucide-react";
 
 export default function AnalyticsPage() {
   // Calculate analytics from exploits array
@@ -23,6 +27,12 @@ export default function AnalyticsPage() {
 
   return (
     <div className="container py-10">
+      <div className="mb-4">
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight">Analytics</h1>
         <p className="text-muted-foreground mt-2">

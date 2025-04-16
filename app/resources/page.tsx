@@ -1,3 +1,4 @@
+"use client"
 import Link from "next/link"
 import { ArrowRightIcon, BookIcon, CodeIcon, ExternalLinkIcon, ShieldIcon } from "lucide-react"
 
@@ -5,9 +6,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+import { ArrowLeftIcon } from "lucide-react";
+
 export default function ResourcesPage() {
   return (
     <div className="container py-10">
+      <div className="mb-4">
+        <Button variant="outline" size="sm" onClick={() => window.history.back()}>
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight">Resources</h1>
         <p className="text-muted-foreground mt-2">Security resources and best practices for the Solana ecosystem</p>
