@@ -1,7 +1,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExploitTypeChart } from "@/components/exploit-type-chart"
 
+import { exploits } from "@/data/exploits";
+
 export default function AnalyticsPage() {
+  // Calculate analytics from exploits array
+  const totalValueLost = exploits.reduce((sum, exploit) => sum + exploit.amount, 0);
+  const numberOfExploits = exploits.length;
+  const averageLoss = numberOfExploits > 0 ? totalValueLost / numberOfExploits : 0;
+  // Funds recovered logic placeholder (update when data available)
+  const fundsRecovered = 0;
+  const percentRecovered = 0;
+
+  // Format numbers
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 0,
+    }).format(amount);
+
   return (
     <div className="container py-10">
       <div className="mb-8">
@@ -17,8 +36,8 @@ export default function AnalyticsPage() {
             <CardTitle className="text-sm font-medium">Total Value Lost</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$511M</div>
-            <p className="text-xs text-muted-foreground">+$0 from last month</p>
+            <div className="text-2xl font-bold">{formatCurrency(totalValueLost)}</div>
+            <p className="text-xs text-muted-foreground">+0 from last month</p>
           </CardContent>
         </Card>
 
@@ -27,7 +46,7 @@ export default function AnalyticsPage() {
             <CardTitle className="text-sm font-medium">Number of Exploits</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">10</div>
+            <div className="text-2xl font-bold">{numberOfExploits}</div>
             <p className="text-xs text-muted-foreground">+0 from last month</p>
           </CardContent>
         </Card>
@@ -37,7 +56,7 @@ export default function AnalyticsPage() {
             <CardTitle className="text-sm font-medium">Average Loss</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$51.1M</div>
+            <div className="text-2xl font-bold">{formatCurrency(averageLoss)}</div>
             <p className="text-xs text-muted-foreground">Per exploit</p>
           </CardContent>
         </Card>
@@ -47,8 +66,8 @@ export default function AnalyticsPage() {
             <CardTitle className="text-sm font-medium">Funds Recovered</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0%</div>
-            <p className="text-xs text-muted-foreground">$0 of $511M</p>
+            <div className="text-2xl font-bold">{percentRecovered}%</div>
+            <p className="text-xs text-muted-foreground">${fundsRecovered} of {formatCurrency(totalValueLost)}</p>
           </CardContent>
         </Card>
       </div>
