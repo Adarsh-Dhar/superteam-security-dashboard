@@ -1,3 +1,4 @@
+"use client"
 import Link from "next/link"
 import { ArrowRightIcon, ExternalLinkIcon } from "lucide-react"
 
@@ -9,12 +10,22 @@ import { ExploitStats } from "@/components/exploit-stats"
 import { ExploitTimeline } from "@/components/exploit-timeline"
 import { ExploitTypeChart } from "@/components/exploit-type-chart"
 import { exploits } from "@/data/exploits"
+import axios from "axios"
 
 export default function Home() {
   // Calculate total amount hacked and number of protocols
   const totalHacked = exploits.reduce((sum, exploit) => sum + exploit.amount, 0)
   const uniqueProtocols = new Set(exploits.map((e) => e.protocol)).size
 
+  const handleLimitation = async () => {
+    try {
+      const response = await axios.get("/api/incidents/frequency")
+      const data = response.data
+      console.log("API Response:", data)
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    }
+  }
   // Format the total amount
   const formattedTotal = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -185,7 +196,10 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Button>
+                <Button onClick={async () => {
+                  console.log("Contribute button clicked");
+                  await handleLimitation();
+                }}>
                   View on GitHub <ExternalLinkIcon className="h-4 w-4" />
                 </Button>
               </div>
