@@ -285,7 +285,7 @@ export default function Dashboard() {
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Response Times</CardTitle>
-            <CardDescription>Average incident response time in hours</CardDescription>
+            <CardDescription>Average incident response time in seconds</CardDescription>
           </CardHeader>
           <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -293,7 +293,7 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis />
-                <Tooltip formatter={(value) => `${value} hours`} />
+                <Tooltip formatter={(value) => `${value} seconds`} />
                 <Legend />
                 <Line 
                   type="monotone" 
