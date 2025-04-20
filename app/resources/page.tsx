@@ -18,8 +18,8 @@ export default function ResourcesPage() {
         </Button>
       </div>
       <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight">Resources</h1>
-        <p className="text-muted-foreground mt-2">Security resources and best practices for the Solana ecosystem</p>
+        <h1 className="text-4xl font-bold tracking-tight">Security Resources</h1>
+        <p className="text-muted-foreground mt-2">Comprehensive security guidelines and best practices for the Solana ecosystem</p>
       </div>
 
       <Tabs defaultValue="developers" className="w-full">
@@ -50,8 +50,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    View Full Guide <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://solana.com/developers/courses/program-security" target="_blank" rel="noopener noreferrer">
+                    Solana Security Course <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -76,8 +76,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    View Code Examples <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://blocksec.com/blog/solana-simplified-master-solana-core-concepts-in-one-read" target="_blank" rel="noopener noreferrer">
+                    BlockSec Workshop Series <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -102,8 +102,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    Download Checklist <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://www.anchor-lang.com/docs/security" target="_blank" rel="noopener noreferrer">
+                    Anchor Security Reference <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -132,8 +132,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    View Full Guide <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://docs.solana.com/wallet-guide" target="_blank" rel="noopener noreferrer">
+                    Official Wallet Guide <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -158,8 +158,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    Learn More <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://solana.com/security" target="_blank" rel="noopener noreferrer">
+                    Security Center <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -184,8 +184,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    View Guide <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://solanacookbook.com/defi" target="_blank" rel="noopener noreferrer">
+                    DeFi Best Practices <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -214,8 +214,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    View Methodology <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://solana.com/developers/audits" target="_blank" rel="noopener noreferrer">
+                    Audit Guidelines <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -240,8 +240,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    Explore Tools <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://github.com/solana-labs/solana-program-library" target="_blank" rel="noopener noreferrer">
+                    Security Tools <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -266,8 +266,8 @@ export default function ResourcesPage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full gap-1" asChild>
-                  <Link href="#">
-                    Access Database <ArrowRightIcon className="h-4 w-4" />
+                  <Link href="https://solana.com/security" target="_blank" rel="noopener noreferrer">
+                    Vulnerability Reports <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -297,7 +297,7 @@ export default function ResourcesPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Anchor Documentation</CardTitle>
+              <CardTitle>Anchor Framework</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">Security best practices for Anchor development</p>
@@ -316,7 +316,7 @@ export default function ResourcesPage() {
               <CardTitle>Solana Cookbook</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Collection of useful code examples and patterns</p>
+              <p className="text-sm text-muted-foreground">Collection of secure code examples and patterns</p>
             </CardContent>
             <CardFooter>
               <Button variant="outline" size="sm" className="w-full gap-1" asChild>
@@ -329,14 +329,14 @@ export default function ResourcesPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Solana Forums</CardTitle>
+              <CardTitle>Security Advisories</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Community discussions on Solana security</p>
+              <p className="text-sm text-muted-foreground">Latest security updates and vulnerability reports</p>
             </CardContent>
             <CardFooter>
               <Button variant="outline" size="sm" className="w-full gap-1" asChild>
-                <Link href="https://forums.solana.com" target="_blank" rel="noopener noreferrer">
+                <Link href="https://solana.com/security" target="_blank" rel="noopener noreferrer">
                   Visit <ExternalLinkIcon className="h-4 w-4" />
                 </Link>
               </Button>

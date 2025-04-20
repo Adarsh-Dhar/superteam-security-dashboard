@@ -40,12 +40,12 @@ export default function ContributePage() {
               it up-to-date.
             </p>
             <div className="bg-muted p-4 rounded-md font-mono text-xs overflow-x-auto">
-              git clone https://github.com/superteam/security-dashboard.git
+              git clone https://github.com/Adarsh-Dhar/superteam-security-dashboard.git
             </div>
           </CardContent>
           <CardFooter>
             <Button className="w-full gap-1" asChild>
-              <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+              <Link href="https://github.com/Adarsh-Dhar/superteam-security-dashboard" target="_blank" rel="noopener noreferrer">
                 View on GitHub <ArrowRightIcon className="h-4 w-4" />
               </Link>
             </Button>
@@ -178,7 +178,7 @@ export default function ContributePage() {
                   <h3 className="font-medium mb-2">1. Set Up the Development Environment</h3>
                   <p className="text-sm text-muted-foreground">Clone the repository and install dependencies.</p>
                   <div className="bg-muted p-3 rounded-md font-mono text-xs mt-2 overflow-x-auto">
-                    {`git clone https://github.com/superteam/security-dashboard.git
+                    {`git clone https://github.com/Adarsh-Dhar/superteam-security-dashboard.git
 cd security-dashboard
 npm install`}
                   </div>
