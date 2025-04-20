@@ -54,7 +54,7 @@ async function getResponseTime(
 
 export async function GET() {
   try {
-    const connection = new Connection(process.env.QUICKNODE_ENDPOINT || ""); ;
+    const connection = new Connection(process.env.SOLANA_RPC_URL || ""); ;
     
     // Get current date and calculate 7 days ago
     const endDate = new Date();

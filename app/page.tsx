@@ -19,7 +19,7 @@ export default function Home() {
 
   const handleLimitation = async () => {
     try {
-      const response = await axios.get("/api/incidents/frequency")
+      const response = await axios.get("/api/incidents/summary")
       const data = response.data
       console.log("API Response:", data)
     } catch (error) {

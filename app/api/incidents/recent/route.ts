@@ -38,8 +38,8 @@ function determineIncidentType(errorLog: string): string {
 
 export async function GET() {
   try {
-    const connection = new Connection(process.env.QUICKNODE_ENDPOINT || "");
-    const programId = new PublicKey(process.env.PROGRAM_ID || "");
+    const connection = new Connection(process.env.SOLANA_RPC_URL || "");
+    const programId = new PublicKey(process.env.MONITORED_PROGRAM_ID || "");
     
     // Get recent signatures
     const signatures = await connection.getSignaturesForAddress(

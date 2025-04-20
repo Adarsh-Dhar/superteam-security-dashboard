@@ -67,28 +67,41 @@ async function calculateLossFromTransfers(
 
 export async function GET() {
   try {
-    const connection = new Connection(process.env.QUICKNODE_ENDPOINT || "");
-    const programId = new PublicKey(process.env.PROGRAM_ID || "");
+    // Check if environment variables are set
+    const rpcUrl = process.env.SOLANA_RPC_URL;
+    const programIdString = process.env.MONITORED_PROGRAM_ID;
+    
+    if (!rpcUrl) {
+      console.error('Missing SOLANA_RPC_URL environment variable');
+      return NextResponse.json({ error: 'RPC URL not configured' }, { status: 500 });
+    }
+    
+    if (!programIdString) {
+      console.error('Missing MONITORED_PROGRAM_ID environment variable');
+      return NextResponse.json({ error: 'Program ID not configured' }, { status: 500 });
+    }
+    
+    // Validate program ID format
+    let programId: PublicKey;
+    try {
+      programId = new PublicKey(programIdString);
+      console.log('Using program ID:', programId.toString());
+    } catch (error) {
+      console.error('Invalid program ID format:', error);
+      return NextResponse.json(
+        { error: 'Invalid program ID format' }, 
+        { status: 400 }
+      );
+    }
+    
+    const connection = new Connection(rpcUrl);
     
     // Get current date and calculate 7 days ago
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 6); // 7 days including today
     
-    // Get program error logs
-    const signatures = await connection.getSignaturesForAddress(
-      programId,
-      { 
-        limit: 1000,
-        before: endDate.toISOString(),
-        until: startDate.toISOString()
-      }
-    );
-    
-    // Filter for transactions with errors (potential incidents)
-    const errorSignatures = signatures.filter(sig => sig.err);
-    
-    // Group by day and calculate total funds lost
+    // Create a map to store funds lost by day
     const fundsLostByDay = new Map<string, number>();
     
     // Initialize all days in the past week with 0 funds lost
@@ -98,25 +111,49 @@ export async function GET() {
       fundsLostByDay.set(formatDateToMMDD(date), 0);
     }
     
-    // Calculate funds lost per day
-    for (const sig of errorSignatures) {
-      if (!sig.signature) continue;
-      if (!sig.blockTime) continue; // Skip if blockTime is not available
-      const txDate = new Date(sig.blockTime * 1000);
-      const dayKey = formatDateToMMDD(txDate);
+    try {
+      // Get program error logs - fix the params
+      // Solana doesn't accept ISO strings for before/until - remove them
+      console.log('Fetching signatures for program:', programId.toString());
+      const signatures = await connection.getSignaturesForAddress(
+        programId,
+        { limit: 100 } // Simplified params
+      );
       
-      if (fundsLostByDay.has(dayKey)) {
-        const loss = await calculateLossFromTransfers(
-          connection,
-          programId,
-          sig.signature
-        );
+      console.log(`Fetched ${signatures.length} signatures`);
+      
+      // Filter for transactions with errors (potential incidents)
+      const errorSignatures = signatures.filter(sig => sig.err);
+      console.log(`Found ${errorSignatures.length} error signatures`);
+      
+      // Calculate funds lost per day
+      for (const sig of errorSignatures) {
+        if (!sig.signature) continue;
+        if (!sig.blockTime) continue; // Skip if blockTime is not available
         
-        fundsLostByDay.set(
-          dayKey, 
-          (fundsLostByDay.get(dayKey) || 0) + loss
-        );
+        const txDate = new Date(sig.blockTime * 1000);
+        
+        // Only consider transactions within our date range
+        if (txDate >= startDate && txDate <= endDate) {
+          const dayKey = formatDateToMMDD(txDate);
+          
+          if (fundsLostByDay.has(dayKey)) {
+            const loss = await calculateLossFromTransfers(
+              connection,
+              programId,
+              sig.signature
+            );
+            
+            fundsLostByDay.set(
+              dayKey, 
+              (fundsLostByDay.get(dayKey) || 0) + loss
+            );
+          }
+        }
       }
+    } catch (error) {
+      console.error('Error fetching signatures:', error);
+      // Continue with empty data rather than failing completely
     }
     
     // Convert map to array format expected by frontend
